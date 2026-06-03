@@ -79,6 +79,10 @@ Deploy across your AWS Organization using a CloudFormation **StackSet**.
 
 [![Deploy Read-Only][deploy-ro-badge]][deploy-ro-link]
 
+> **Already deployed?** Do **not** click the button again — it will fail with `AlreadyExistsException`.
+> To update permissions on an existing deployment, go to **CloudFormation → Stacks → `Infoblox-Discovery-Role-Filtered` → Update → Replace current template** and paste the S3 URL above.
+> See [Updating an Existing StackSet](#updating-an-existing-stackset) for full instructions.
+
 ---
 
 ### Option B — Read + Route53 Write
@@ -101,6 +105,9 @@ This variant uses the **same StackSet name** (`Infoblox-Discovery-Role`) as Opti
 push the expanded policy to all member accounts — no deletion, no re-onboarding.
 
 [![Deploy Read + Route53 Write][deploy-r53w-badge]][deploy-r53w-link]
+
+> **Already deployed Option A?** Do **not** click this button — use **Update stack** on your existing `Infoblox-Discovery-Role-Filtered` stack with this template URL instead.
+> See [Updating an Existing StackSet](#updating-an-existing-stackset) for full instructions.
 
 ---
 
@@ -305,6 +312,7 @@ Then deploy with `CallAs: DELEGATED_ADMIN`.
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `OrganizationalUnitIds should be specified in DeploymentTargets in [SERVICE_MANAGED] model` | `TargetOUsCsv` was left blank | Provide at least one OU ID or the org root ID (`r-xxxx`) |
+| `Stack [Infoblox-Discovery-Role-Filtered] already exists` | The deploy button was clicked again on an already-deployed stack — the button only creates, never updates | Do not redeploy. Go to **CloudFormation → Stacks → `Infoblox-Discovery-Role-Filtered` → Update → Replace current template** to apply changes to an existing deployment |
 | `Resource … 'Infoblox-Discovery-Role' already exists` | A previous deployment left an orphan StackSet | Delete the existing StackSet (and its instances) from the CloudFormation StackSets console, then redeploy |
 | `AccessDenied` on `sts:AssumeRole` (after successful deploy) | `ExternalId` in the role doesn't match what Infoblox presents | Update the bootstrap stack with the correct `ExternalId` |
 | Role missing in management account | AWS never deploys SERVICE_MANAGED stacks to the management account | Deploy a standalone stack in the management account |
