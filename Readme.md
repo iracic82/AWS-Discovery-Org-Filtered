@@ -164,6 +164,9 @@ AccountFilterCsv:  111111111111,222222222222
 
 Both variants use the same policy name. The R53 Write variant adds the `Route53Write` Sid on top of all read-only statements below.
 
+> This permission set matches the official Infoblox documentation exactly:
+> [AWS Least Privilege IAM Permissions](https://docs.infoblox.com/space/BloxOneDDI/2358182069/AWS+Least+Privilege+IAM+Permissions) — 68 read-only actions across 10 Sid groups, maintained by Infoblox engineering.
+
 | Service | Permissions |
 |---------|------------|
 | EC2 | `DescribeRegions`, `DescribeVpcs`, `DescribeVpcAttribute`, `DescribeSubnets`, `DescribeRouteTables`, `DescribeAvailabilityZones`, `DescribeManagedPrefixLists`, `DescribeInternetGateways`, `DescribeEgressOnlyInternetGateways`, `DescribeNatGateways`, `DescribeTransitGateways`, `DescribeTransitGatewayVpcAttachments`, `DescribeTransitGatewayPeeringAttachments`, `DescribeAddresses`, `DescribeNetworkAcls`, `DescribeNetworkInterfaces`, `DescribeVpcEndpoints`, `DescribeVpcPeeringConnections`, `DescribeVpnConnections`, `DescribeVpnGateways`, `DescribeCustomerGateways`, `DescribeInstances`, `DescribeSecurityGroups`, `DescribeSecurityGroupRules`, `DescribeSecurityGroupReferences`, `DescribeStaleSecurityGroups`, `DescribeVolumes`, `DescribeVolumeStatus`, `DescribeSnapshots`, `DescribeSnapshotAttribute` |
