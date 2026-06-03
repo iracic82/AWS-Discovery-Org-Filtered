@@ -1,8 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   Bootstrap Stack to create a service-managed CloudFormation StackSet that deploys the
-  'infoblox_discovery' IAM role. Targets Organizational Units (OUs) with optional
-  account filtering — include specific accounts (INTERSECTION) or exclude accounts (DIFFERENCE).
+  'infoblox_discovery' IAM role with Route53 write permissions for DNS management.
+  Targets Organizational Units (OUs) with optional account filtering —
+  include specific accounts (INTERSECTION) or exclude accounts (DIFFERENCE).
 
 Parameters:
   ExternalId:
@@ -78,23 +79,23 @@ Resources:
   DiscoveryRoleStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: Infoblox-Discovery-Role
+      StackSetName: Infoblox-Discovery-Role-R53Write
       PermissionModel: SERVICE_MANAGED
       CallAs: !Ref CallAs
-      AutoDeployment:
-        Enabled: !If [ AutoDeployEnabled, true, false ]
-        RetainStacksOnAccountRemoval: false
       ManagedExecution:
         Active: true
       OperationPreferences:
         MaxConcurrentPercentage: 100
         FailureTolerancePercentage: 10
         RegionConcurrencyType: PARALLEL
+      AutoDeployment:
+        Enabled: !If [ AutoDeployEnabled, true, false ]
+        RetainStacksOnAccountRemoval: false
       Capabilities:
         - CAPABILITY_NAMED_IAM
       TemplateBody: |
         AWSTemplateFormatVersion: '2010-09-09'
-        Description: Infoblox infoblox_discovery IAM role with least-privilege asset and network discovery permissions
+        Description: Infoblox infoblox_discovery IAM role with asset discovery and Route53 write permissions
         Parameters:
           ExternalId:
             Type: String
@@ -116,7 +117,7 @@ Resources:
                       StringEquals:
                         sts:ExternalId: !Ref ExternalId
               Policies:
-                - PolicyName: InfobloxAssetDiscovery
+                - PolicyName: InfobloxAssetDiscoveryR53Write
                   PolicyDocument:
                     Version: "2012-10-17"
                     Statement:
@@ -228,11 +229,21 @@ Resources:
                           - route53resolver:ListResolverRules
                           - route53resolver:ListResolverRuleAssociations
                         Resource: "*"
+                      - Sid: Route53Write
+                        Effect: Allow
+                        Action:
+                          - route53:ChangeResourceRecordSets
+                          - route53:CreateHostedZone
+                          - route53:DeleteHostedZone
+                          - route53:AssociateVPCWithHostedZone
+                          - route53:DisassociateVPCFromHostedZone
+                          - route53:UpdateHostedZoneComment
+                        Resource: "*"
               Tags:
                 - Key: CreatedBy
                   Value: CloudFormation-StackSet
                 - Key: Purpose
-                  Value: Infoblox-Discovery
+                  Value: Infoblox-Discovery-R53Write
         Outputs:
           RoleARN:
             Description: ARN of the created IAM role
