@@ -40,12 +40,10 @@ Before deploying, confirm the following in your **AWS Organizations management a
    - Only needs to be done once per organization.
 
 3. **Deployer has sufficient permissions** — the IAM principal creating the bootstrap stack needs:
-   - `cloudformation:*` (StackSet operations)
-   - `iam:CreateRole`, `iam:AttachRolePolicy`, `iam:PutRolePolicy`, `iam:PassRole`
-   - `organizations:ListRoots`, `organizations:ListOrganizationalUnitsForParent`, `organizations:ListAccountsForParent`, `organizations:DescribeOrganization`
-   - `s3:GetObject` on the template bucket (if using S3 URL)
-
-4. **Avoid direct StackSet edits** — Always update through the **bootstrap stack** (`CloudFormation → Stacks → Update`), not directly through the StackSets console or `update-stack-instances`. Editing the StackSet directly causes drift between the bootstrap stack and the StackSet, and bypasses CloudFormation's state tracking.
+   - `cloudformation:*` (stack and StackSet operations)
+   - `organizations:DescribeOrganization`, `organizations:ListRoots`, `organizations:ListOrganizationalUnitsForParent`, `organizations:ListAccountsForParent`
+   - `s3:GetObject` on the template bucket (if using an S3 URL)
+   - Note: IAM operations in member accounts (`CreateRole`, `PutRolePolicy`) are performed by the auto-created `stacksets-exec-*` execution role, not by the deployer directly.
 
 ---
 
