@@ -282,12 +282,6 @@ Management Account
 
 Note: The management account itself is excluded from StackSet deployment by AWS design.
 
----
-
-## Related
-
-- [AWS-Discovery-Org-Write](https://github.com/iracic82/AWS-Discovery-Org-Write) — Simpler OU-only version with Route53 write permissions and ReadOnlyAccess managed policy
-
 [deploy-ro-badge]: https://img.shields.io/badge/Deploy%20Read--Only%20(StackSet)-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white
 [deploy-ro-link]: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Finfoblox-igor.s3.eu-west-1.amazonaws.com%2Finfoblox_discovery_stackset_bootstrap_filtered.yaml&stackName=Infoblox-Discovery-Role-Filtered&param_ExternalId=f90ae844-4072-47a5-a6a3-4f900e8317df&param_AccountId=902917483333&param_TargetOUsCsv=%3CREPLACE_WITH_YOUR_OU_IDS%3E&param_AccountFilterMode=NONE&param_Regions=us-east-1&param_AutoDeployNewAccounts=true&param_CallAs=SELF
 
