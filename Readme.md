@@ -4,12 +4,16 @@ This repository provides CloudFormation templates to deploy the **`infoblox_disc
 IAM role across your AWS Organization using a **SERVICE_MANAGED StackSet** with
 support for account-level filtering.
 
-Two variants are available:
+Two variants are available — deploy **one or the other**, not both:
 
 | Template | Use case |
 |----------|----------|
 | **Read-Only** (recommended) | Discovery only — no changes to DNS |
 | **Read + Route53 Write** | Discovery + Infoblox manages Route53 DNS records |
+
+> **Upgrading from Read-Only to Route53 Write?** No need to delete anything.
+> Simply update your existing bootstrap stack with the R53Write template —
+> CloudFormation pushes the expanded policy to all member accounts automatically.
 
 This version includes:
 
@@ -76,19 +80,21 @@ Deploy across your AWS Organization using a CloudFormation **StackSet**.
 ### Option B — Read + Route53 Write
 
 Use this variant when Infoblox needs to **create, update, or delete Route53 DNS records**
-(e.g. for NIOS-X DNS management). All discovery permissions from Option A are included,
-plus the following Route53 write actions:
+(e.g. for NIOS-X DNS management). Includes all discovery permissions from Option A plus:
 
 - `route53:ChangeResourceRecordSets` — create/update/delete DNS records
 - `route53:CreateHostedZone` / `route53:DeleteHostedZone` — manage zones
 - `route53:AssociateVPCWithHostedZone` / `route53:DisassociateVPCFromHostedZone` — private zones
 - `route53:UpdateHostedZoneComment`
 
-> **When to use:** Only deploy this variant to accounts where Infoblox actively manages DNS.
-> For discovery-only accounts, use Option A.
+This variant uses the **same StackSet name** (`Infoblox-Discovery-Role`) as Option A.
+**Do not deploy both** — use one or the other.
 
-This template creates a **separate StackSet** (`Infoblox-Discovery-Role-R53Write`) so both
-variants can coexist without conflict.
+**Deploying fresh:** use the button below.
+
+**Upgrading from Option A:** update your existing bootstrap stack in CloudFormation
+(*Update → Replace current template → use the R53Write S3 URL*). CloudFormation will
+push the expanded policy to all member accounts — no deletion, no re-onboarding.
 
 [![Deploy Read + Route53 Write][deploy-r53w-badge]][deploy-r53w-link]
 

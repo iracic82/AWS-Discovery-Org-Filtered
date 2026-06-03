@@ -79,7 +79,7 @@ Resources:
   DiscoveryRoleStackSet:
     Type: AWS::CloudFormation::StackSet
     Properties:
-      StackSetName: Infoblox-Discovery-Role-R53Write
+      StackSetName: Infoblox-Discovery-Role
       PermissionModel: SERVICE_MANAGED
       CallAs: !Ref CallAs
       ManagedExecution:
@@ -117,7 +117,7 @@ Resources:
                       StringEquals:
                         sts:ExternalId: !Ref ExternalId
               Policies:
-                - PolicyName: InfobloxAssetDiscoveryR53Write
+                - PolicyName: InfobloxAssetDiscovery
                   PolicyDocument:
                     Version: "2012-10-17"
                     Statement:
@@ -243,7 +243,7 @@ Resources:
                 - Key: CreatedBy
                   Value: CloudFormation-StackSet
                 - Key: Purpose
-                  Value: Infoblox-Discovery-R53Write
+                  Value: Infoblox-Discovery
         Outputs:
           RoleARN:
             Description: ARN of the created IAM role
