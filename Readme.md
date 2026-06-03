@@ -266,6 +266,7 @@ Then deploy with `CallAs: DELEGATED_ADMIN`.
 | `AccessDenied` on `sts:AssumeRole` (after successful deploy) | `ExternalId` in the role doesn't match what Infoblox presents | Update the bootstrap stack with the correct `ExternalId` |
 | Role missing in management account | AWS never deploys SERVICE_MANAGED stacks to the management account | Deploy a standalone stack in the management account |
 | `Trusted access is not enabled` | CloudFormation ↔ Organizations trusted access not activated | Enable from CloudFormation → StackSets console (management account only) |
+| `You must be the management account or delegated admin account` on a specific stack instance (not on the bootstrap stack) | A target member account independently deployed the bootstrap template as its own local CloudFormation stack, creating a nested `AWS::CloudFormation::StackSet` resource. Member accounts cannot operate SERVICE_MANAGED StackSets | Log into that member account and delete its local bootstrap stack (`aws cloudformation delete-stack --stack-name <bootstrap-stack-name>`), then retry the StackSet operation from the management account |
 
 ---
 
