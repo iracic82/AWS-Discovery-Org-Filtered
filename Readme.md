@@ -231,6 +231,40 @@ aws cloudformation update-stack \
 
 ---
 
+## Checking Deployment Status
+
+After deploying or updating, use these commands to see which accounts succeeded or failed.
+
+**All instances and their status:**
+```bash
+aws cloudformation list-stack-instances \
+  --stack-set-name Infoblox-Discovery-Role \
+  --region eu-west-1 \
+  --query "Summaries[*].{Account:Account,Region:Region,Status:Status,Reason:StatusReason}" \
+  --output table
+```
+
+Instance `Status` values:
+| Status | Meaning |
+|--------|---------|
+| `CURRENT` | Role deployed successfully and up to date |
+| `OUTDATED` | Last operation failed or account not yet updated |
+| `INOPERABLE` | Account is suspended or otherwise unreachable |
+
+**Filter to failed accounts only:**
+```bash
+aws cloudformation list-stack-instances \
+  --stack-set-name Infoblox-Discovery-Role \
+  --filters Name=DETAILED_STATUS,Values=FAILED \
+  --region eu-west-1 \
+  --query "Summaries[*].{Account:Account,Region:Region,Status:Status,Reason:StatusReason}" \
+  --output table
+```
+
+This shows the account ID and the exact failure reason for each failed instance — useful for identifying which accounts need attention and why.
+
+---
+
 ## Delegated Administrator Setup
 
 If the deploying account is **not** the management account, it must be registered as a
