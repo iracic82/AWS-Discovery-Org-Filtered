@@ -39,7 +39,13 @@ Before deploying, confirm the following in your **AWS Organizations management a
    - CLI: `aws organizations enable-aws-service-access --service-principal stacksets.cloudformation.amazonaws.com`
    - Only needs to be done once per organization.
 
-3. **Deployer has sufficient permissions** — the IAM principal creating the bootstrap stack needs CloudFormation, Organizations, and IAM permissions in the management (or delegated admin) account.
+3. **Deployer has sufficient permissions** — the IAM principal creating the bootstrap stack needs:
+   - `cloudformation:*` (StackSet operations)
+   - `iam:CreateRole`, `iam:AttachRolePolicy`, `iam:PutRolePolicy`, `iam:PassRole`
+   - `organizations:ListRoots`, `organizations:ListOrganizationalUnitsForParent`, `organizations:ListAccountsForParent`, `organizations:DescribeOrganization`
+   - `s3:GetObject` on the template bucket (if using S3 URL)
+
+4. **Avoid direct StackSet edits** — Always update through the **bootstrap stack** (`CloudFormation → Stacks → Update`), not directly through the StackSets console or `update-stack-instances`. Editing the StackSet directly causes drift between the bootstrap stack and the StackSet, and bypasses CloudFormation's state tracking.
 
 ---
 
@@ -70,7 +76,7 @@ Deploy across your AWS Organization using a CloudFormation **StackSet**.
 5. Enter your target OU IDs (or root ID `r-xxxx`) in **`TargetOUsCsv`**.
 6. Set `CallAs` to `SELF` (management account) or `DELEGATED_ADMIN` (delegated admin account).
 7. Choose **one region** (IAM is global — `us-east-1` is sufficient).
-8. Optionally configure account filtering.
+8. Optionally configure account filtering (`AccountFilterMode` and `AccountFilterCsv`).
 9. Click **Create stack**.
 
 [![Deploy Read-Only][deploy-ro-badge]][deploy-ro-link]
@@ -183,6 +189,8 @@ Both variants use the same policy name. The R53 Write variant adds the `Route53W
 
 You do **not** need to delete and recreate the StackSet to update permissions.
 Update the bootstrap stack directly — CloudFormation propagates the change to all member accounts automatically.
+
+> **Important:** Always update via the bootstrap stack (`CloudFormation → Stacks`), **not** directly through the StackSets console or CLI `update-stack-instances`. Editing the StackSet directly causes drift and bypasses CloudFormation's state tracking for the bootstrap stack.
 
 **Via Console:**
 1. CloudFormation → Stacks → select the bootstrap stack (e.g. `Infoblox-Discovery-Role-Filtered`)
