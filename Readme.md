@@ -36,7 +36,7 @@ Before deploying, confirm the following in your **AWS Organizations management a
 
 2. **Trusted access activated** — authorizes CloudFormation StackSets to manage roles across the org.
    - Console: CloudFormation → StackSets → *Enable trusted access* (banner on first visit)
-   - CLI: `aws cloudformation activate-organizations-access`
+   - CLI: `aws organizations enable-aws-service-access --service-principal stacksets.cloudformation.amazonaws.com`
    - Only needs to be done once per organization.
 
 3. **Deployer has sufficient permissions** — the IAM principal creating the bootstrap stack needs CloudFormation, Organizations, and IAM permissions in the management (or delegated admin) account.
@@ -156,7 +156,9 @@ AccountFilterCsv:  111111111111,222222222222
 
 ## Permissions Included
 
-### Inline Policy: `InfobloxAssetDiscovery` (Read-Only variant)
+### Inline Policy: `InfobloxAssetDiscovery`
+
+Both variants use the same policy name. The R53 Write variant adds the `Route53Write` Sid on top of all read-only statements below.
 
 | Service | Permissions |
 |---------|------------|
@@ -169,7 +171,7 @@ AccountFilterCsv:  111111111111,222222222222
 | DirectConnect | `DescribeDirectConnectGateways`, `DescribeDirectConnectGatewayAttachments`, `DescribeConnections`, `DescribeVirtualInterfaces` |
 | CloudWatch | `ListMetrics`, `GetMetricStatistics`, `GetMetricData` |
 
-### Additional Policy: `Route53Write` (R53 Write variant only)
+### Additional Sid: `Route53Write` (R53 Write variant only)
 
 | Service | Permissions |
 |---------|------------|
@@ -188,12 +190,37 @@ Update the bootstrap stack directly — CloudFormation propagates the change to 
 3. Review parameter changes → Submit
 4. CloudFormation updates the StackSet and pushes the new role policy to all instances
 
-**Via CLI:**
+**Via CLI (keep existing parameters, update template only):**
 ```bash
+# Update to read-only template (permission refresh)
 aws cloudformation update-stack \
   --stack-name Infoblox-Discovery-Role-Filtered \
   --template-url https://infoblox-igor.s3.eu-west-1.amazonaws.com/infoblox_discovery_stackset_bootstrap_filtered.yaml \
-  --capabilities CAPABILITY_NAMED_IAM
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameters \
+    ParameterKey=ExternalId,UsePreviousValue=true \
+    ParameterKey=AccountId,UsePreviousValue=true \
+    ParameterKey=TargetOUsCsv,UsePreviousValue=true \
+    ParameterKey=AccountFilterMode,UsePreviousValue=true \
+    ParameterKey=AccountFilterCsv,UsePreviousValue=true \
+    ParameterKey=Regions,UsePreviousValue=true \
+    ParameterKey=AutoDeployNewAccounts,UsePreviousValue=true \
+    ParameterKey=CallAs,UsePreviousValue=true
+
+# Upgrade to Route53 Write (replace template URL only)
+aws cloudformation update-stack \
+  --stack-name Infoblox-Discovery-Role-Filtered \
+  --template-url https://infoblox-igor.s3.eu-west-1.amazonaws.com/infoblox_discovery_stackset_bootstrap_filtered_r53write.yaml \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameters \
+    ParameterKey=ExternalId,UsePreviousValue=true \
+    ParameterKey=AccountId,UsePreviousValue=true \
+    ParameterKey=TargetOUsCsv,UsePreviousValue=true \
+    ParameterKey=AccountFilterMode,UsePreviousValue=true \
+    ParameterKey=AccountFilterCsv,UsePreviousValue=true \
+    ParameterKey=Regions,UsePreviousValue=true \
+    ParameterKey=AutoDeployNewAccounts,UsePreviousValue=true \
+    ParameterKey=CallAs,UsePreviousValue=true
 ```
 
 ---
@@ -265,4 +292,4 @@ Note: The management account itself is excluded from StackSet deployment by AWS 
 [deploy-ro-link]: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Finfoblox-igor.s3.eu-west-1.amazonaws.com%2Finfoblox_discovery_stackset_bootstrap_filtered.yaml&stackName=Infoblox-Discovery-Role-Filtered&param_ExternalId=f90ae844-4072-47a5-a6a3-4f900e8317df&param_AccountId=902917483333&param_TargetOUsCsv=%3CREPLACE_WITH_YOUR_OU_IDS%3E&param_AccountFilterMode=NONE&param_Regions=us-east-1&param_AutoDeployNewAccounts=true&param_CallAs=SELF
 
 [deploy-r53w-badge]: https://img.shields.io/badge/Deploy%20Read%20%2B%20Route53%20Write%20(StackSet)-FF4500?style=for-the-badge&logo=amazon-aws&logoColor=white
-[deploy-r53w-link]: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Finfoblox-igor.s3.eu-west-1.amazonaws.com%2Finfoblox_discovery_stackset_bootstrap_filtered_r53write.yaml&stackName=Infoblox-Discovery-Role-Filtered-R53Write&param_ExternalId=f90ae844-4072-47a5-a6a3-4f900e8317df&param_AccountId=902917483333&param_TargetOUsCsv=%3CREPLACE_WITH_YOUR_OU_IDS%3E&param_AccountFilterMode=NONE&param_Regions=us-east-1&param_AutoDeployNewAccounts=true&param_CallAs=SELF
+[deploy-r53w-link]: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Finfoblox-igor.s3.eu-west-1.amazonaws.com%2Finfoblox_discovery_stackset_bootstrap_filtered_r53write.yaml&stackName=Infoblox-Discovery-Role-Filtered&param_ExternalId=f90ae844-4072-47a5-a6a3-4f900e8317df&param_AccountId=902917483333&param_TargetOUsCsv=%3CREPLACE_WITH_YOUR_OU_IDS%3E&param_AccountFilterMode=NONE&param_Regions=us-east-1&param_AutoDeployNewAccounts=true&param_CallAs=SELF
